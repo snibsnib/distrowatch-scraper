@@ -1,74 +1,84 @@
-# Distrowatch scraper/crawler (spider)
-Download whole distrowatch database with information on each distribution to separate files
+# Distrowatch scraper
+Download whole distrowatch database with information on each distribution to .csv and .sqlite
 
-![Img](https://imgur.com/kAOI7fU.png)
+This is a fork of [https://github.com/sxiii/distrowatch-scraper/]
 
-## Why do you need this
-* You like to survey or find information about distributions
-* You're writing a diploma or analytical work
-* You're curious on stastistics
-* You're studying how to write scripts and/or crawlers/scrapers
+Some of the data fields were broken and I wanted to take the scraper in a different direction.
+Porting the data to sqlite makes it much easier to parse the data and find an exact distridution that suits my needs.
 
-## Requirements
-Works with arch, ubuntu & fedora. Recent version is developed on Arch (Manjaro)
-* html2text
-* wget
-* sed
-* grep
-* bash/linux
+This script pulls the html file of all active distros on DistroWatch and parses them.
 
-## How to use the script in 6 steps
-0. Install the requirements (arch: `sudo pacman -S html2text wget git`) # replace with apt for ubuntu and dnf for fedora
-1. Clone this repository (`git clone https://github.com/sxiii/distrowatch-scraper`)
-2. Enter the cloned folder (`cd distr*`)
-3. Make the script executable (`chmod +x parse.sh`)
-4. Run it (`./parse.sh`)
-5. Review it's console output or file output (files are created in current date folder!)
+** I am not a programmer, but I have done my best to write decent code. There may be bugs. **
 
-## How to view the results
-They are layed out in $(current.date) directory (if today is 12.12.2012, the directory will be 12.12.2012). Inside this folder you'll find more then 800 files. Most of the files are named ".results" and ".desc". Desc - it's downloaded web pages with full HTML source of distribution description. ".results" is files with sorted results according to the following scheme:
+## Limitations
+* This script cannot differentiate between different versions of a distro (eg: Debian stable vs testing, openSUSE leap vs tumbleweed). The first entry on each page will be chosen. I recommend checking the `lastv` field to know what has been selected.
+* The data from this tool is only as up to date as DistroWatch is.
+
+## Major changes
+* Only currently active distributions are scraped
+* Added a lot more parameters
+* Removed Plotting Functionality
+* Added database funtionality
 
 ## Results scheme
-* "Based On" - name of the distro, that current was based off,
-* "Origin" - country of distribution origin,
-* "Architecture" - distribution architecture,
-* "Desktops" - desktop that distro officially supports,
-* "Category" - which are main use-cases for this distribution,
-* "Status" - is the distribution active, dormant, discounted, on waiting list or evaluting (statuses according to distrowatch)
-* "Description" - the description itself,
-* "Website" - official web portal of the distro,
-* "Latest version" - latest published version of the distro.
+* id - Distrowatch id (eg: distrowatch.com/table.php?distribution=__debian__)
+* name - Distro Name
+* basedon - Distribution that it is based on
+* origin - Country of Origin
+* arch - CPU Architecture
+* desktop - Supported Desktop Environments
+* packagemanager - Supported Package Managers
+* releasemodel - Release Model (Rolling, Fixed, etc)
+* init - Init System (systemd, runit, etc)
+* kernel_ver - Current linux Kernel
+* xorg_ver - X Server Version (if used)
+* wayland_ver - Wayland Version (if used)
+* gcc_ver - GCC Version
+* clang_ver - Clang Version (if used)
+* category - Distro Category (Desktop, Server, etc)
+* status - Distribution Status (Active, Dorman, etc)
+* rank - Popularity Ranking (1 is most popular)
+* desc - Distribution Description
+* web - Ditribution Website
+* lastv - Latest Version
+* lastdate - Date of last update
 
-There'd also be a linux-clean.list, which is list of all current distribution names.
+## Requirements
+Tested using Debian.
+* html2text
+* wget
+* awk
+* sed
+* grep
+* sqlite3
 
-Note: as it's Linux world, you might port any of distributions from supported platform architecture to unsupported (rewrite, recheck and recompile it), you might compile another desktop environment for it. Distributions statuses might be incorrect because information delay or just a human error. So to be sure, just check all fields and know, that this data "is not a diagnosis".
+## How to use the script
+1. Install the requirements
+   ```sudo apt install -y html2text wget awk sed grep sqlite3```
+2. Clone this repository or download dw_scraper.sh
+3. Make the script executable ```chmod +x dw_scraper.sh```
+4. Run it ```./parse.sh``` (May take several minutes)
+5. A folder with todays date will be created, with the databases
 
-## Future plans
-* Make the script output data & generate some fancy infographics after downlading database
-* Support of different output formats
-* Port the script to support some other distribution websites
-* (maybe) get rid of html2text?
-* make it work faster (parallelly?)
-* make some sort of menu for this script
+## Example sqlite Query
 
-## Bugs or errors
-This script has a little difference in handling the html2text because of difference in these programs in ArchLinux and Ubuntu. ArchLinux does create markdown text from HTML, while Ubuntu creates plain text. That's why you might edit the script or take the older (ubuntu) version to use with debian/ubuntu OS. Pastebin older ubuntu version is here (tho it's not so improved): https://pastebin.com/nnuVAJdJ
+As an example, lets say you wanted a desktop ditribution that supports Gnome and SystemD with the most up to date kernel, but would also like to know if Wayland is supported.
 
-If you notice any other bugs, please create an issue.
+'''
+SELECT 
+	CAST(rank as INT) as 'Rank',
+	name as 'Name', 
+	lastv as 'Version',
+	kernel_ver as 'Kernel Ver.',
+	releasemodel,
+	wayland_ver,
+	lastdate as 'Updated'
+FROM db
+WHERE init like '%systemd%'
+AND desktop like '%GNOME%'
+AND category like '%Desktop%'
+ORDER by kernel_ver DESC;
+'''
 
-## Help and development
-* You might help to improve this script. Read the "future plan section"
-* That's a good idea to implement your own ideas and commit them to this repository
-* Contact me on telegram (fakesnowden) for your ideas and knowledge exchange
-
-## Useful links on the topic
-* https://distrowatch.com
-* https://distrowatch.com/weekly.php?issue=current
-* http://futurist.se/gldt/
-* https://github.com/FabioLolix/LinuxTimeline
-* https://en.wikipedia.org/wiki/Linux_distribution
-
-*may the source be with you.*
-
-## Last update
-Still works in 2020; 911 active distributions @ 16 oct 2020.
+## Possible Updates
+* Add Gnome/KDE supported version numbers (Say if you were looking for KDE 6)
