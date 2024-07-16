@@ -10,9 +10,16 @@ working="tmp"
 mkdir -p scan_$date
 cd scan_$date
 
-#cleanup old files
-rm *.* 2> /dev/null
-
+#cleanup old files (double check we are in the right folder before deleting everything)
+base=$(basename "$PWD")
+if [ $base = scan_$date ]; then
+	echo "Setting up /scan_$date/"
+	rm *.* 2> /dev/null
+	else
+	echo "Error: Folder not selected."
+	exit 1
+fi
+ 
 #grab list of distros(text for scraper loop, csv for sqlite)
 wget -q -O - distrowatch.com/search.php?status=Active | grep -A 1  "<option selected value=\"\">Select Distribution</option>" | tr "<" '\n' | grep '"[^"]*"' | cut -c 15- | sed 's/["].*//' | tail -n +2 > $distro_list
 cat $distro_list | tr '\n' , > $distro_list_csv
