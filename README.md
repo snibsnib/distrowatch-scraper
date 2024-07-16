@@ -44,7 +44,7 @@ This script pulls the html file of all active distros on DistroWatch and parses 
 * lastdate - Date of last update
 
 ## Requirements
-Works with arch, ubuntu & fedora. Recent version is developed on Arch (Manjaro)
+Tested using Debian.
 * html2text
 * wget
 * awk
