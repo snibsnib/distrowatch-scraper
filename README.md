@@ -10,7 +10,7 @@ This script pulls the html file of all active distros on DistroWatch and parses 
 
 ** I am not a programmer, but I have done my best to write decent code. There may be bugs. **
 
-** Limitations
+## Limitations
 * This script cannot differentiate between different versions of a distro (eg: Debian stable vs testing, openSUSE leap vs tumbleweed). The first entry on each page will be chosen. I recommend checking the `lastv` field to know what has been selected.
 * The data from this tool is only as up to date as DistroWatch is.
 
